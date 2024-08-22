@@ -6,13 +6,12 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
 builder.Services.AddDbContext<AuthDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddSingleton(provider =>
 {
-    return new KafkaProducer("localhost:9092");  // Kafka Broker adresinizi buraya girin
+    return new KafkaProducer("localhost:9092");  
 });
 
 builder.Services.AddEndpointsApiExplorer();
@@ -35,7 +34,6 @@ builder.Services.AddControllers();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();

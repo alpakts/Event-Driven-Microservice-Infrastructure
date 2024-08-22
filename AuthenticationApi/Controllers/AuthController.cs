@@ -40,7 +40,6 @@ namespace AuthenticationApi.Controllers
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
 
-            // Kafka'ya JSON formatında mesaj gönderme
             var userEvent = new UserRegisteredEvent
             {
                 Username = user.Username,

@@ -59,7 +59,7 @@ dlldata.c
 
 # Benchmark Results
 BenchmarkDotNet.Artifacts/
-
+kafka-data/
 # .NET
 project.lock.json
 project.fragment.lock.json

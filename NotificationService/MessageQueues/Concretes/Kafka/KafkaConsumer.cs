@@ -13,21 +13,30 @@ public class KafkaConsumer<T> : IMessageQueueConsumer<T>
         {
             GroupId = groupId,
             BootstrapServers = brokerList,
-            AutoOffsetReset = AutoOffsetReset.Earliest
+            AutoOffsetReset = AutoOffsetReset.Earliest,
+             EnableAutoCommit = true
         };
 
         _consumer = new ConsumerBuilder<Null, string>(config).Build();
         _messageProcessor = messageProcessor;
     }
 
-    public void Consume(string topic)
+    public async Task ConsumeAsync(string topic)
     {
         _consumer.Subscribe(topic);
         while (true)
         {
-            var consumeResult = _consumer.Consume(CancellationToken.None);
-            var message = JsonConvert.DeserializeObject<T>(consumeResult.Message.Value);
-            _messageProcessor.ProcessMessageAsync(message).Wait();
+            try
+            {
+                var consumeResult = _consumer.Consume(CancellationToken.None);
+                var message = JsonConvert.DeserializeObject<T>(consumeResult.Message.Value);
+                await _messageProcessor.ProcessMessageAsync(message);
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
         }
     }
 }

@@ -2,7 +2,7 @@
 {
     public interface IMessageQueueConsumer<T>
     {
-        void Consume(string topicOrQueue);
+        Task ConsumeAsync(string topicOrQueue);
     }
 
 }

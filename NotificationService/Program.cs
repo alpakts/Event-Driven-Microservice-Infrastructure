@@ -6,8 +6,8 @@ using NotificationService.Models;
 using NotificationService.Services;
 using NotificationService.Settings;
 var configuration = new ConfigurationBuilder()
-               .SetBasePath(Directory.GetCurrentDirectory()) // Projenin çalıştığı dizini alır
-               .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true) // appsettings.json dosyasını ekler
+               .SetBasePath(Directory.GetCurrentDirectory()) 
+               .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true) 
                .Build();
 
 var emailSettings = configuration.GetSection("EmailSettings").Get<EmailSettings>();

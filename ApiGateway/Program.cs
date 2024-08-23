@@ -6,6 +6,10 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Configuration.AddJsonFile("ocelot.json", optional: false, reloadOnChange: true);
 builder.Services.AddControllers();
+builder.Services.AddCors(opt =>
+{
+    opt.AddDefaultPolicy(opt => opt.AllowAnyOrigin().AllowAnyMethod().AllowCredentials().AllowAnyHeader());
+});
 // Ocelot'u servis olarak ekleyin
 builder.Services.AddOcelot();
 builder.Services.AddSwaggerGen();

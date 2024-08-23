@@ -31,3 +31,12 @@ services:
       - "9000:9000"
     depends_on:
       - kafka
+
+  consul:
+    image: hashicorp/consul:latest
+    container_name: consul-server
+    ports:
+      - "8500:8500"
+    command: "agent -dev -client=0.0.0.0"  
+    depends_on:
+      - kafka

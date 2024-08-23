@@ -1,6 +1,8 @@
-﻿using Microsoft.OpenApi.Models;
-using Ocelot.DependencyInjection;
+﻿using Ocelot.DependencyInjection;
 using Ocelot.Middleware;
+using Ocelot.Provider.Consul;
+using Steeltoe.Discovery.Client;
+using Steeltoe.Discovery.Consul;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,9 +12,9 @@ builder.Services.AddCors(opt =>
 {
     opt.AddDefaultPolicy(opt => opt.AllowAnyOrigin().AllowAnyMethod().AllowCredentials().AllowAnyHeader());
 });
-// Ocelot'u servis olarak ekleyin
-builder.Services.AddOcelot();
+builder.Services.AddOcelot().AddConsul();
 builder.Services.AddSwaggerGen();
+builder.Services.AddServiceDiscovery(options => options.UseConsul());
 var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
@@ -21,7 +23,6 @@ if (app.Environment.IsDevelopment())
     {
         c.SwaggerEndpoint("/swagger/v1/swagger.json", "API Gateway v1");
 
-        c.SwaggerEndpoint("https://localhost:44361/swagger/v1/swagger.json", "Authentication API v1");
     });
 }
 app.MapControllers();

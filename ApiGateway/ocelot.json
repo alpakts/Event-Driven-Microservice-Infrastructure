@@ -1,21 +1,18 @@
 {
   "Routes": [
     {
-      "DownstreamPathTemplate": "/api/Auth/{everything}", 
-      "DownstreamScheme": "https",
-      "DownstreamHostAndPorts": [
-        {
-          "Host": "localhost",
-          "Port": 44361
-        }
-      ],
-      "UpstreamPathTemplate": "/api/Auth/{everything}", 
-      "UpstreamHttpMethod": [ "POST", "GET", "PUT", "DELETE" ],
-      "RouteIsCaseSensitive": false
+      "DownstreamPathTemplate": "/api/auth/{everything}",
+      "DownstreamScheme": "http",
+      "ServiceName": "AuthService",
+      "UpstreamPathTemplate": "/api/auth/{everything}",
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
     }
   ],
   "GlobalConfiguration": {
-    "BaseUrl": "https://localhost:5000", 
-    "RequestIdKey": "OcRequestId"
+    "ServiceDiscoveryProvider": {
+      "Host": "localhost",
+      "Port": 8500,
+      "Type": "Consul"
+    }
   }
 }

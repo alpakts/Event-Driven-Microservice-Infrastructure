@@ -16,11 +16,13 @@ namespace AuthenticationApi.Controllers
     {
         private readonly AuthDbContext _context;
         private readonly KafkaProducer _producer;
+        private readonly IConfiguration _configuration;
 
-        public AuthController(AuthDbContext context, KafkaProducer producer)
+        public AuthController(AuthDbContext context, KafkaProducer producer, IConfiguration configuration)
         {
             _context = context;
             _producer = producer;
+            _configuration = configuration;
         }
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterDto request)
@@ -63,7 +65,7 @@ namespace AuthenticationApi.Controllers
         private string GenerateJwtToken(User user)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.ASCII.GetBytes("your_secret_key_your_secret_key_your_secret_key_your_secret_key_your_secret_key_"); 
+            var key = Encoding.ASCII.GetBytes(_configuration["JwtSettings:SecretKey"]); 
 
             var tokenDescriptor = new SecurityTokenDescriptor
             {

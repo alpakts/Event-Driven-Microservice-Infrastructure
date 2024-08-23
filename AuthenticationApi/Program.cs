@@ -11,7 +11,7 @@ builder.Services.AddDbContext<AuthDbContext>(options =>
 
 builder.Services.AddSingleton(provider =>
 {
-    return new KafkaProducer("localhost:9092");  
+    return new KafkaProducer(builder.Configuration["KafkaSettings:Url"]);  
 });
 
 builder.Services.AddEndpointsApiExplorer();
@@ -24,22 +24,25 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes("your_secret_key")),
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(builder.Configuration["JwtSettings:SecretKey"])),
             ValidateIssuer = false,
             ValidateAudience = false
         };
     });
-
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("gatewayPolicy", opt => opt.WithOrigins("http://localhost:5019").AllowAnyHeader().AllowAnyMethod());
+});
 builder.Services.AddControllers();
 
 var app = builder.Build();
 
+app.UseCors("gatewayPolicy");
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-
 app.UseHttpsRedirection();
 
 app.UseAuthorization();

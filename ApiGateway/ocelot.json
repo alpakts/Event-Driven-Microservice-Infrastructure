@@ -5,10 +5,15 @@
       "DownstreamScheme": "http",
       "ServiceName": "AuthService",
       "UpstreamPathTemplate": "/api/auth/{everything}",
-      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
+      "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
+      "UpstreamScheme": "http"
+
     }
   ],
   "GlobalConfiguration": {
+    "RequestIdKey": "OcRequestId",
+    "BaseUrl": "localhost:5000",
+    "UseServiceDiscovery": true,
     "ServiceDiscoveryProvider": {
       "Host": "localhost",
       "Port": 8500,

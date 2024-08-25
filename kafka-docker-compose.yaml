@@ -37,6 +37,8 @@ services:
     container_name: consul-server
     ports:
       - "8500:8500"
+      - "8600:8600/tcp"
+      - "8600:8600/udp"
     command: "agent -dev -client=0.0.0.0"  
     depends_on:
       - kafka

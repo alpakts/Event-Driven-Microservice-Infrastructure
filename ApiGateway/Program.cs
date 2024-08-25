@@ -1,31 +1,42 @@
 ﻿using Ocelot.DependencyInjection;
 using Ocelot.Middleware;
 using Ocelot.Provider.Consul;
-using Steeltoe.Discovery.Client;
-using Steeltoe.Discovery.Consul;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Configuration.AddJsonFile("ocelot.json", optional: false, reloadOnChange: true);
+// Add services to the container.
+
 builder.Services.AddControllers();
-builder.Services.AddCors(opt =>
-{
-    opt.AddDefaultPolicy(opt => opt.AllowAnyOrigin().AllowAnyMethod().AllowCredentials().AllowAnyHeader());
-});
-builder.Services.AddOcelot().AddConsul();
+// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.AddServiceDiscovery(options => options.UseConsul());
+
+IConfiguration configuration = new ConfigurationBuilder()
+                            .AddJsonFile("ocelot.json")
+                            .Build();
+
+// ServicePointManager.ServerCertificateValidationCallback += sender, cert, chain, sslPolicyErrors) => true;
+
+builder.Services
+    .AddOcelot(configuration)
+    .AddConsul();
+
+
 var app = builder.Build();
+
+// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI(c =>
-    {
-        c.SwaggerEndpoint("/swagger/v1/swagger.json", "API Gateway v1");
-
-    });
+    app.UseSwaggerUI();
 }
-app.MapControllers();
-await app.UseOcelot();
+
+// app.UseHttpsRedirection();
+
+app.UseOcelot().Wait();
+
+// app.UseAuthorization();
+
+// app.MapControllers();
 
 app.Run();

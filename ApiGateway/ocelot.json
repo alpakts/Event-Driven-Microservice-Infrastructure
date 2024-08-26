@@ -1,23 +1,48 @@
 {
   "Routes": [
     {
+      "DownstreamPathTemplate": "/api/auth/login",
+      "UpstreamPathTemplate": "/api/auth/login",
+      "ServiceName": "authentication-service",
+      "UpstreamHttpMethod": [ "Post" ],
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/api/auth/register",
+      "UpstreamPathTemplate": "/api/auth/register",
+      "ServiceName": "authentication-service",
+      "UpstreamHttpMethod": [ "Post" ],
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
       "DownstreamPathTemplate": "/api/auth/{everything}",
       "DownstreamScheme": "http",
       "ServiceName": "AuthService",
-      "UpstreamPathTemplate": "/api/auth/{everything}",
+      "UpstreamPathTemplate": "/a/{everything}",
       "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
-      "UpstreamScheme": "http"
-
+      "UpstreamScheme": "http",
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      },
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer",
+        "AllowedScopes": []
+      }
     }
   ],
   "GlobalConfiguration": {
     "RequestIdKey": "OcRequestId",
-    "BaseUrl": "localhost:5000",
+    "BaseUrl": "http://localhost:5000",
     "UseServiceDiscovery": true,
     "ServiceDiscoveryProvider": {
       "Host": "localhost",
       "Port": 8500,
-      "Type": "Consul"
+      "Type": "CustomConsulProviderResolvingHost",
+      "Scheme": "http"
     }
   }
 }

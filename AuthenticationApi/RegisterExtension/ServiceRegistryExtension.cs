@@ -1,45 +1,61 @@
 ﻿using AuthenticationApi.Settings;
 using Consul;
+using Microsoft.AspNetCore.Hosting.Server.Features;
+using Microsoft.AspNetCore.Http.Features;
 
 namespace AuthenticationApi.RegisterExtension;
-public static class ServiceRegistryExtension
+public static class ConsuleRegistration
 {
-    //consul service config
-    public static IServiceCollection AddConsulSettings(this IServiceCollection services, ServiceSettings serviceSettings)
+    public static IServiceCollection ConfigureConsul(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddSingleton<IConsulClient, ConsulClient>(c => new ConsulClient(config =>
+        services.AddSingleton<IConsulClient, ConsulClient>(c => new ConsulClient(consulConfig =>
         {
-            config.Address = new Uri(serviceSettings.ServiceDiscoveryAddress); //add discovery address "http://127.0.0.1:8500"
+            var address = configuration["ServiceSettings:ServiceDiscoveryAddress"];
+            consulConfig.Address = new Uri(address);
         }));
 
         return services;
     }
 
-
-    public static IApplicationBuilder RegisterConsul(this IApplicationBuilder app, ServiceSettings serviceSettings)
+    public static IApplicationBuilder RegisterWithConsul(this IApplicationBuilder app, IHostApplicationLifetime lifetime)
     {
+        var consulClient = app.ApplicationServices.GetRequiredService<IConsulClient>();
 
-        IConsulClient consulClient = app.ApplicationServices.GetRequiredService<IConsulClient>();
-        ILogger logger = app.ApplicationServices.GetRequiredService<ILoggerFactory>().CreateLogger("ServiceRegistryExtension");
-        IHostApplicationLifetime lifetime = app.ApplicationServices.GetRequiredService<IHostApplicationLifetime>();
+        var loggingFactory = app.ApplicationServices.GetRequiredService<ILoggerFactory>();
 
-        AgentServiceRegistration registration = new AgentServiceRegistration()
+        var logger = loggingFactory.CreateLogger<IApplicationBuilder>();
+
+        // Get server ip address
+        var features = app.Properties["server.Features"] as FeatureCollection;
+        var addresses = features.Get<IServerAddressesFeature>();
+        if (addresses.Addresses.Count == 0)
         {
-            ID = serviceSettings.ServiceName, //service name
-            Name = serviceSettings.ServiceName,
-            Address = serviceSettings.ServiceHost,
-            Port = serviceSettings.ServicePort
+            // Add the default address to the IServerAddressesFeature if it does not exist
+            addresses.Addresses.Add("http://localhost:5001");
+        }
+        var address = addresses.Addresses.First();
+
+        // Register service with consul
+        var uri = new Uri(address);
+        var registration = new AgentServiceRegistration()
+        {
+            ID = "AuthService-1",
+            Name = "AuthService",
+            Address = uri.Host,
+            Port = uri.Port,
+            Tags = new[] { "Auth Service", "Auth" }
         };
 
-        logger.LogInformation("🖊️ -> Registering with Consul");
-        consulClient.Agent.ServiceDeregister(registration.ID).ConfigureAwait(true); //Deregister service before registering.
-        consulClient.Agent.ServiceRegister(registration).ConfigureAwait(true); //Deregister service before registering.
+        logger.LogInformation("Registering service with Consul..");
+        consulClient.Agent.ServiceDeregister(registration.ID).Wait();
+        consulClient.Agent.ServiceRegister(registration).Wait();
 
-        lifetime.ApplicationStopping.Register(() => {
-            logger.LogInformation("❌ -> Deregistering with Consul");
+        lifetime.ApplicationStopping.Register(() =>
+        {
+            logger.LogInformation("Deregistering service from Consul..");
+            consulClient.Agent.ServiceDeregister(registration.ID).Wait();
         });
 
         return app;
     }
 }
-

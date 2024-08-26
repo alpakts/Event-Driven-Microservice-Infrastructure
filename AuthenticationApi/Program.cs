@@ -1,7 +1,6 @@
 ﻿using AuthenticationApi.RegisterExtension;
 using AuthenticationApi.Services.Queue.Kafka;
-using AuthenticationApi.Settings;
-using Consul;
+using IdentityService.Persistence.Context;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -16,7 +15,7 @@ builder.Services.AddSingleton(provider =>
 {
     return new KafkaProducer(builder.Configuration["KafkaSettings:Url"]);
 });
-
+builder.Services.ConfigureConsul(builder.Configuration);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -30,20 +29,12 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateAudience = false
         };
     });
-ServiceSettings serviceSettings = new ServiceSettings();
-builder.Configuration.GetSection("ServiceSettings").Bind(serviceSettings);
-builder.Services.AddSingleton(serviceSettings);
-builder.Services.AddConsulSettings(serviceSettings);
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("gatewayPolicy", opt => opt.WithOrigins("http://localhost:5000").AllowAnyHeader().AllowAnyMethod());
-});
+builder.Services.ConfigureConsul(builder.Configuration);
 
 builder.Services.AddControllers();
 
 var app = builder.Build();
 
-app.UseCors("gatewayPolicy");
 
 if (app.Environment.IsDevelopment())
 {
@@ -51,11 +42,11 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
-app.RegisterConsul(serviceSettings);
+var lifetime = app.Services.GetRequiredService<IHostApplicationLifetime>();
+app.RegisterWithConsul(lifetime);
 using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<AuthDbContext>();

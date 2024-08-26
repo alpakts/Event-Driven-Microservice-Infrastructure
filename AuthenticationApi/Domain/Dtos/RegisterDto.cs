@@ -1,12 +1,16 @@
-﻿namespace AuthenticationApi.Models.Dtos
+﻿using IdentityService.Domain.Abstraction;
+
+namespace IdentityService.Domain.Dtos
 {
-    public class RegisterDto
+    public class RegisterDto : IDto
     {
         public string Username { get; set; }
         public string Password { get; set; }
         public string Email { get; set; }
+        public string FullName { get; set; }
+
     }
-    public class LoginDto
+    public class LoginDto : IDto
     {
         public string Username { get; set; }
         public string Password { get; set; }

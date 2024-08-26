@@ -1,6 +1,7 @@
-﻿using AuthenticationApi.Models.Dtos;
-using AuthenticationApi.Services.Queue.Kafka;
+﻿using AuthenticationApi.Services.Queue.Kafka;
 using AuthenticationApi.Services.Queue.Kafka.Events;
+using IdentityService.Domain.Dtos;
+using IdentityService.Persistence.Context;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -36,7 +37,7 @@ namespace AuthenticationApi.Controllers
                 Username = request.Username,
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password),
                 Email = request.Email,
-                Role = "User"
+                FullName=request.FullName
             };
 
             _context.Users.Add(user);
@@ -72,7 +73,6 @@ namespace AuthenticationApi.Controllers
                 Subject = new ClaimsIdentity(new[]
                 {
             new Claim(ClaimTypes.Name, user.Username),
-            new Claim(ClaimTypes.Role, user.Role)
         }),
                 Expires = DateTime.UtcNow.AddHours(1),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)

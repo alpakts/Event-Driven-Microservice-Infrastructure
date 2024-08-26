@@ -8,6 +8,8 @@ services:
       ZOOKEEPER_TICK_TIME: 2000
     ports:
       - "2181:2181"
+    networks:
+      - kafka-network
 
   kafka:
     image: confluentinc/cp-kafka:latest
@@ -17,10 +19,12 @@ services:
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
     ports:
       - "9092:9092"
+    networks:
+      - kafka-network
 
   kafka-manager:
     image: hlebalbau/kafka-manager:latest
@@ -31,14 +35,22 @@ services:
       - "9000:9000"
     depends_on:
       - kafka
+    networks:
+      - kafka-network
 
   consul:
     image: hashicorp/consul:latest
     container_name: consul-server
     ports:
-      - "8500:8500"
-      - "8600:8600/tcp"
-      - "8600:8600/udp"
-    command: "agent -dev -client=0.0.0.0"  
+      - "8500:8500"  # Consul Web UI ve API için
+      - "8600:8600/tcp"  # Consul DNS için TCP portu
+      - "8600:8600/udp"  # Consul DNS için UDP portu
+    command: "agent -dev -client=0.0.0.0 -bind 127.0.0.1"  # Geliştirme modunda çalışır, tüm ağ arayüzlerinden erişilebilir
     depends_on:
       - kafka
+    networks:
+      - kafka-network
+
+networks:
+  kafka-network:
+    driver: bridge

@@ -11,18 +11,18 @@ using Ocelot.Values;
 
 namespace ApiGateway.ServiceProvider;
 
-public class CustomConsulProviderResolvingHost : IServiceDiscoveryProvider
+public class CustomConsulProviderForResolvingHost : IServiceDiscoveryProvider
 {
     private const string VersionPrefix = "version-";
     private readonly ConsulRegistryConfiguration _config;
     private readonly IConsulClient _consul;
     private readonly IOcelotLogger _logger;
 
-    public CustomConsulProviderResolvingHost(ConsulRegistryConfiguration config, IOcelotLoggerFactory factory, IConsulClientFactory clientFactory)
+    public CustomConsulProviderForResolvingHost(ConsulRegistryConfiguration config, IOcelotLoggerFactory factory, IConsulClientFactory clientFactory)
     {
         _config = config;
         _consul = clientFactory.Get(_config);
-        _logger = factory.CreateLogger<CustomConsulProviderResolvingHost>();
+        _logger = factory.CreateLogger<CustomConsulProviderForResolvingHost>();
     }
 
     public async Task<List<Service>> GetAsync()
@@ -79,7 +79,7 @@ public class CustomConsulProviderFactory : IServiceDiscoveryProviderFactory
     /// <summary>
     /// String constant used for provider type definition.
     /// </summary>
-    public const string PollConsul = nameof(CustomConsulProviderResolvingHost);
+    public const string PollConsul = nameof(CustomConsulProviderForResolvingHost);
 
     private static readonly List<PollConsul> ServiceDiscoveryProviders = new();
     private static readonly object LockObject = new();
@@ -101,7 +101,7 @@ public class CustomConsulProviderFactory : IServiceDiscoveryProviderFactory
         var consulRegistryConfiguration = new ConsulRegistryConfiguration(
             config.Scheme, config.Host, config.Port, route.ServiceName, config.Token);
 
-        var consulProvider = new CustomConsulProviderResolvingHost(consulRegistryConfiguration, factory, consulFactory);
+        var consulProvider = new CustomConsulProviderForResolvingHost(consulRegistryConfiguration, factory, consulFactory);
 
         if (PollConsul.Equals(config.Type, StringComparison.OrdinalIgnoreCase))
         {

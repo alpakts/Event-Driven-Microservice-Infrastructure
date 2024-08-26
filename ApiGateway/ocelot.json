@@ -2,7 +2,7 @@
   "Routes": [
     {
       "DownstreamPathTemplate": "/api/auth/login",
-      "UpstreamPathTemplate": "/api/auth/login",
+      "UpstreamPathTemplate": "/a/login",
       "ServiceName": "authentication-service",
       "UpstreamHttpMethod": [ "Post" ],
       "LoadBalancerOptions": {
@@ -11,7 +11,7 @@
     },
     {
       "DownstreamPathTemplate": "/api/auth/register",
-      "UpstreamPathTemplate": "/api/auth/register",
+      "UpstreamPathTemplate": "/a/register",
       "ServiceName": "authentication-service",
       "UpstreamHttpMethod": [ "Post" ],
       "LoadBalancerOptions": {
@@ -41,7 +41,7 @@
     "ServiceDiscoveryProvider": {
       "Host": "localhost",
       "Port": 8500,
-      "Type": "CustomConsulProviderResolvingHost",
+      "Type": "CustomConsulProviderForResolvingHost",
       "Scheme": "http"
     }
   }

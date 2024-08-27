@@ -1,4 +1,4 @@
-﻿using IdentityService.Helpers;
+﻿using IdentityService.Application.Helpers;
 using IdentityService.Persistence.Configurations.Base;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;

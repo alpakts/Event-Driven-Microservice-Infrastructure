@@ -1,9 +1,8 @@
-﻿using AuthenticationApi.Settings;
-using Consul;
+﻿using Consul;
 using Microsoft.AspNetCore.Hosting.Server.Features;
 using Microsoft.AspNetCore.Http.Features;
 
-namespace AuthenticationApi.RegisterExtension;
+namespace IdentityService.Application.Extensions;
 public static class ConsuleRegistration
 {
     public static IServiceCollection ConfigureConsul(this IServiceCollection services, IConfiguration configuration)

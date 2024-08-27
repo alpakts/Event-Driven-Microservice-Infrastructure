@@ -1,7 +1,7 @@
 ﻿using Confluent.Kafka;
 using Newtonsoft.Json;
 
-namespace AuthenticationApi.Services.Queue.Kafka
+namespace IdentityService.Infrastructures.Services.Queue.Kafka
 {
     public class KafkaProducer
     {

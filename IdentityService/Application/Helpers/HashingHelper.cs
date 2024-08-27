@@ -1,7 +1,7 @@
 ﻿using System.Security.Cryptography;
 using System.Text;
 
-namespace IdentityService.Helpers;
+namespace IdentityService.Application.Helpers;
 
 public class HashingHelper
 {
@@ -68,8 +68,8 @@ public class HashingHelper
     {
         if (string.IsNullOrWhiteSpace(toEncrypt)) return "";
 
-        byte[] keyArray = UTF8Encoding.UTF8.GetBytes(key);
-        byte[] toEncryptArray = UTF8Encoding.UTF8.GetBytes(toEncrypt);
+        byte[] keyArray = Encoding.UTF8.GetBytes(key);
+        byte[] toEncryptArray = Encoding.UTF8.GetBytes(toEncrypt);
 
         RijndaelManaged rDel = new RijndaelManaged();
         rDel.Key = keyArray;
@@ -86,7 +86,7 @@ public class HashingHelper
     {
         if (string.IsNullOrWhiteSpace(toDecrypt)) return "";
 
-        byte[] keyArray = UTF8Encoding.UTF8.GetBytes(key);
+        byte[] keyArray = Encoding.UTF8.GetBytes(key);
         byte[] toEncryptArray = Convert.FromBase64String(toDecrypt);
 
         RijndaelManaged rDel = new RijndaelManaged();
@@ -97,7 +97,7 @@ public class HashingHelper
         ICryptoTransform cTransform = rDel.CreateDecryptor();
         byte[] resultArray = cTransform.TransformFinalBlock(toEncryptArray, 0, toEncryptArray.Length);
 
-        return UTF8Encoding.UTF8.GetString(resultArray);
+        return Encoding.UTF8.GetString(resultArray);
     }
 
     public static string GeyRandomAESKey()
@@ -106,18 +106,18 @@ public class HashingHelper
         Random rnd1 = new Random();
         int r = rnd1.Next(10, 100);
         long num2 = DateTime.Now.Ticks + r;
-        Random random = new Random(((int)(((ulong)num2) & 0xffffffffL)) | ((int)(num2 >> r)));
+        Random random = new Random((int)((ulong)num2 & 0xffffffffL) | (int)(num2 >> r));
         for (int i = 0; i < 16; i++)
         {
             char ch;
             int num = random.Next();
-            if ((num % 2) == 0)
+            if (num % 2 == 0)
             {
-                ch = (char)(0x30 + ((ushort)(num % 10)));
+                ch = (char)(0x30 + (ushort)(num % 10));
             }
             else
             {
-                ch = (char)(0x41 + ((ushort)(num % 0x1a)));
+                ch = (char)(0x41 + (ushort)(num % 0x1a));
             }
             str = str + ch.ToString();
         }

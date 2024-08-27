@@ -1,4 +1,4 @@
-﻿namespace AuthenticationApi.Services.Queue.Kafka.Events
+﻿namespace IdentityService.Infrastructures.Services.Queue.Kafka.Events
 {
     public class UserRegisteredEvent
     {

@@ -1,6 +1,6 @@
-﻿using AuthenticationApi.Services.Queue.Kafka;
-using AuthenticationApi.Services.Queue.Kafka.Events;
-using IdentityService.Domain.Dtos;
+﻿using IdentityService.Domain.Dtos;
+using IdentityService.Infrastructures.Services.Queue.Kafka;
+using IdentityService.Infrastructures.Services.Queue.Kafka.Events;
 using IdentityService.Persistence.Context;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;

@@ -1,7 +1,10 @@
-﻿using IdentityService.Domain.Dtos;
+﻿using IdentityService.Application.Helpers;
+using IdentityService.Application.Services.Auth;
+using IdentityService.Domain.Dtos;
 using IdentityService.Infrastructures.Services.Queue.Kafka;
 using IdentityService.Infrastructures.Services.Queue.Kafka.Events;
 using IdentityService.Persistence.Context;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -18,55 +21,37 @@ namespace AuthenticationApi.Controllers
         private readonly AuthDbContext _context;
         private readonly KafkaProducer _producer;
         private readonly IConfiguration _configuration;
+        private readonly IAuthService _authService;
 
-        public AuthController(AuthDbContext context, KafkaProducer producer, IConfiguration configuration)
+        public AuthController(AuthDbContext context, KafkaProducer producer, IConfiguration configuration, IAuthService authService)
         {
             _context = context;
             _producer = producer;
             _configuration = configuration;
+            _authService = authService;
         }
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterDto request)
         {
-            var userExists = await _context.Users.AnyAsync(u => u.Username == request.Username);
-            if (userExists)
-                return BadRequest("User already exists.");
+            var response = await _authService.Register(request);
+            if(response.Error != null) return Ok(response);
+            return BadRequest(response);
 
-            var user = new User
-            {
-                Username = request.Username,
-                PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password),
-                Email = request.Email,
-                FullName=request.FullName
-            };
 
-            _context.Users.Add(user);
-            await _context.SaveChangesAsync();
-
-            var userEvent = new UserRegisteredEvent
-            {
-                Username = user.Username,
-                Email = user.Email
-            };
-            await _producer.ProduceAsync("user-registered", userEvent);
-
-            return Ok("User registered successfully.");
         }
         [HttpPost("login")]
-    public async Task<IActionResult> Login([FromBody] LoginDto request)
-    {
-        var user = await _context.Users.SingleOrDefaultAsync(u => u.Username == request.Username);
-        if (user == null || !BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
-            return Unauthorized("Invalid username or password.");
+        public async Task<IActionResult> Login([FromBody] LoginDto request)
+        {
+            var response =  await _authService.Login(request);
+            if (response.Error != null) return Ok(response);
+            return BadRequest(response);
 
-        var token = GenerateJwtToken(user);
 
-        return Ok(new { Token = token });
-    }
+        }
         private string GenerateJwtToken(User user)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.ASCII.GetBytes(_configuration["JwtSettings:SecretKey"]); 
+            var key = Encoding.ASCII.GetBytes(_configuration["JwtSettings:SecretKey"]);
 
             var tokenDescriptor = new SecurityTokenDescriptor
             {

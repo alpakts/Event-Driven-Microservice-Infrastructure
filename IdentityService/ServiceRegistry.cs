@@ -1,4 +1,5 @@
-﻿using IdentityService.Application.Repositories;
+﻿using IdentityService.Application.Helpers;
+using IdentityService.Application.Repositories;
 using IdentityService.Application.Services.Auth;
 using IdentityService.Infrastructures.Services.Auth;
 using IdentityService.Infrastructures.Services.Queue.Kafka;
@@ -29,6 +30,7 @@ public static class ServiceRegistry
         // Repositories
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IClaimRepository, ClaimRepository>();
+        services.AddScoped<IUsersClaimsRepository, UsersClaimsRepository>();
 
         // Services
         services.AddScoped<IAuthService, AuthService>();
@@ -38,7 +40,8 @@ public static class ServiceRegistry
         {
             return new KafkaProducer(kafkaUrl);
         });
-
+        //helpers
+        services.AddSingleton<JwtHelper>();
         // Authentication
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>

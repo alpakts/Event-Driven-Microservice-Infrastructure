@@ -10,10 +10,12 @@ public class UserConfiguration : BaseConfiguration<User>
     {
         base.Configure(builder);
         base.Configure(builder);
-        builder.Property(x => x.FullName).HasColumnName("FirstName").IsRequired(true).HasMaxLength(100);
+
+        builder.Property(x => x.FullName).HasColumnName("FullName").IsRequired(true).HasMaxLength(100);
         builder.Property(x => x.Email).HasColumnName("Email").IsRequired(true).HasMaxLength(100);
-        builder.HasIndex(x => x.Email, "UK_Users_Email").IsUnique();
-        builder.Property(x => x.PasswordHash).HasColumnName("PasswordHash").IsRequired(true).HasMaxLength(500);
+        builder.HasIndex(x => x.Email, "Email").IsUnique();
+        builder.Property(x => x.PasswordHash).HasColumnName("PasswordHash").IsRequired(true);
+        builder.Property(x => x.PasswordSalt).HasColumnName("PasswordSalt").IsRequired(true).HasColumnType("bytea") ;
         builder.HasMany(u => u.UserClaims);
         builder.ToTable("Users");
         builder.HasData(getSeeds());
@@ -33,9 +35,10 @@ public class UserConfiguration : BaseConfiguration<User>
             {
                 Id = 1,
                 FullName = "Super Admin",
+                Username ="Admin",
                 Email = "admin@admin.com",
-                PasswordHash = passwordHash.ToString(),
-                PasswordSalt = passwordSalt.ToString(),
+                PasswordHash = passwordHash,
+                PasswordSalt = passwordSalt,
                 PhoneCountryCode = "90",
                 PhoneNumber = "5555555555"
             };

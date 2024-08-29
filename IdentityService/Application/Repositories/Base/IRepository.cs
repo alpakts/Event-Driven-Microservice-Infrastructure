@@ -7,6 +7,7 @@ namespace IdentityService.Application.Repositories.Base
 {
     public interface IRepository<TEntity> where TEntity : Entity, new()
     {
+        IQueryable<TEntity> Query();
         Task<TEntity?> GetAsync(
             Expression<Func<TEntity, bool>> predicate,
             Func<IQueryable<TEntity>, IIncludableQueryable<TEntity, object>>? include = null,

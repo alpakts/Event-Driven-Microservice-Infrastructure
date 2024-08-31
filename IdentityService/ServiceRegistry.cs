@@ -1,7 +1,9 @@
 ﻿using IdentityService.Application.Helpers;
 using IdentityService.Application.Repositories;
 using IdentityService.Application.Services.Auth;
+using IdentityService.Application.Services.Claim;
 using IdentityService.Infrastructures.Services.Auth;
+using IdentityService.Infrastructures.Services.Claim;
 using IdentityService.Infrastructures.Services.Queue.Kafka;
 using IdentityService.Persistence.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -34,6 +36,7 @@ public static class ServiceRegistry
 
         // Services
         services.AddScoped<IAuthService, AuthService>();
+        services.AddScoped<IClaimService, ClaimService>();
 
         // Kafka Producer
         services.AddSingleton(provider =>

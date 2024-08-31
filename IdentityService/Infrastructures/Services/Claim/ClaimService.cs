@@ -2,6 +2,7 @@
 using IdentityService.Application.Services.Claim;
 using IdentityService.Domain.Dtos;
 using IdentityService.Domain.Entities;
+using System;
 using System.Linq.Expressions;
 
 namespace IdentityService.Infrastructures.Services.Claim;
@@ -53,18 +54,48 @@ public class ClaimService : IClaimService
         return await _claimRepository.GetAsync(predicate);
     }
 
-    public Task<IList<Domain.Entities.Claim>> GetClaimsAsync()
+    public async Task<IList<Domain.Entities.Claim>> GetClaimsAsync()
     {
-        throw new NotImplementedException();
+        return await _claimRepository.GetListAsync();
     }
 
-    public Task<ClaimResponseDto> RemoveClaimAsync(Domain.Entities.Claim claim)
+    public async Task<ClaimResponseDto> RemoveClaimAsync(Domain.Entities.Claim claim)
     {
-        throw new NotImplementedException();
+       await _claimRepository.DeleteAsync(claim);
+        return new ClaimResponseDto()
+        {
+
+            ClaimId = claim.Id,
+            ClaimName = claim.Name,
+            ClaimType = claim.ClaimType,
+            UserClaims = claim.UserClaims?.ToList()
+        };
     }
 
-    public Task<ClaimResponseDto> RemoveClaimFromUserAsync(User user, Domain.Entities.Claim claim)
+    public async Task<ClaimResponseDto> RemoveClaimFromUserAsync(int userId, int claimId)
     {
-        throw new NotImplementedException();
+        var user = await _userRepository.GetAsync(s=>s.Id ==  userId);
+        var claim =await  _claimRepository.GetAsync(s=>s.Id == claimId);
+        if (user is null || claim is null)
+        {
+            throw new ArgumentException("user or claim is null");
+        }
+        UserClaim userClaim = new()
+        {
+            ClaimId = claimId,
+            Claim = claim,
+            UserId = userId,
+            User = user,
+            Value = claim.Name
+        };
+        user.UserClaims.Add(userClaim);
+        await _userClaimRepository.AddAsync(userClaim);
+        return new ClaimResponseDto()
+        {
+            ClaimId = claimId,
+            ClaimName = claim.Name,
+            ClaimType = claim.ClaimType,
+            UserClaims = claim.UserClaims?.ToList()
+        };
     }
 }
